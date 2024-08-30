@@ -2,10 +2,9 @@ from bisect import bisect
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, NamedTuple
 
-from tqdm import tqdm
-
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
 
 from utils.consts import (CHEMICAL_SUBSTANCE_COLUMNS, COLUMNS, DATA_DIR, END_YEAR, LOCATION_COLUMN_NAME, START_YEAR,
                           TARGET_COLUMN_NAME, TIME_COLUMN_NAME)
