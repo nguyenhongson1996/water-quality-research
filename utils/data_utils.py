@@ -17,7 +17,7 @@ def load_data_from_excels(files: List[str], data_dir: Path = DATA_DIR, ) -> pd.D
     current_columns: Optional[List[str]] = None
     dataframes: List[pd.DataFrame] = []
     for file in files:
-        df = pd.read_excel(file, header=0)
+        df = pd.read_excel(data_dir / file, header=0)
         if current_shape and df.shape != current_shape:
             raise ValueError(f"The shape of the dataframe is {df.shape} is missmatch with the current shape "
                              f"{current_shape}")
