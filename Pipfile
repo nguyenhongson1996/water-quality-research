@@ -8,6 +8,7 @@ pandas = "~=2.2.2"
 pydantic = { extras = ["dotenv"], version = "~=1.10.2" }
 xlrd = "~=2.0.1"
 openpyxl = "~=3.1.5"
+tqdm = "~=4.66.5"
 
 [dev-packages]
 pytest = "~=6.2.2"
