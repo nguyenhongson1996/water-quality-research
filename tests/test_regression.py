@@ -13,4 +13,10 @@ first_x, first_y = train_dataloader.dataset[0]
 input_dim = first_x.shape[-1]
 
 model = BasicRegression(input_dim=input_dim)
-model.fit(train_dataloader, test_dataloader, epochs=100, optimizer_type="adam", loss_fn=nn.MSELoss())
+
+num_epochs = 200
+lr = 0.01
+lr_params = {"start_factor": 0.1,
+             "end_factor": lr, "total_iters": num_epochs}
+model.fit(train_dataloader, test_dataloader, epochs=num_epochs, optimizer_type="adam", loss_fn=nn.MSELoss(), lr=lr,
+          scheduler_params=lr_params, patience=20)
