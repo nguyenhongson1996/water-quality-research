@@ -140,7 +140,6 @@ database/dictionary_database
 database/processed_database
 ocr_storage/
 *.png
-/models
 upload
 
 
