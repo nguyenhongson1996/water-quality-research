@@ -1,9 +1,10 @@
+import math
 from abc import abstractmethod
 from typing import Any, Dict, List, Optional, Tuple
 
 import torch
 import torch.nn as nn
-from torch.optim.lr_scheduler import CosineAnnealingLR, LRScheduler, ReduceLROnPlateau, StepLR
+from torch.optim.lr_scheduler import CosineAnnealingLR, LinearLR, LRScheduler, ReduceLROnPlateau, StepLR
 from torch.utils.data.dataloader import DataLoader
 
 
@@ -52,6 +53,8 @@ class BaseModel(nn.Module):
         if scheduler_params is None:
             scheduler_params = {}
 
+        if scheduler_type == 'linear':
+            return LinearLR(optimizer, **scheduler_params)
         if scheduler_type == 'reduce_lr_on_plateau':
             return ReduceLROnPlateau(optimizer, **scheduler_params)
         elif scheduler_type == 'step_lr':
@@ -71,7 +74,7 @@ class BaseModel(nn.Module):
 
     def fit(self, train_loader: DataLoader, val_loader: Optional[DataLoader], epochs: int = 100,
             optimizer_type: str = "adam", loss_fn: nn.Module = nn.MSELoss(), lr: float = 0.001,
-            scheduler_type: str = "step_lr", scheduler_params: Optional[Dict[str, Any]] = None,
+            scheduler_type: str = "linear", scheduler_params: Optional[Dict[str, Any]] = None,
             patience: int = 10, detailed_eval_params: Optional[Dict[str, Any]] = None):
         """
         Train the model using the provided data loaders.
@@ -88,16 +91,15 @@ class BaseModel(nn.Module):
         :param detailed_eval_params: Params used in evaluating the result in details.
         """
         optimizer = self._get_optimizer(optimizer_type, lr)
-        scheduler = self._get_scheduler(optimizer, scheduler_type, scheduler_params)
+        scheduler = self._get_lr_scheduler(optimizer, scheduler_type, scheduler_params)
 
         best_val_loss = float('inf')
         epochs_without_improvement = 0
         for epoch in range(epochs):
             self.train()
             train_loss = 0.0
-
             for batch_x, batch_y in train_loader:
-                self.optimizer.zero_grad()
+                optimizer.zero_grad()
                 y_pred = self(batch_x)
                 loss = loss_fn(y_pred, batch_y)
                 loss.backward()
@@ -154,13 +156,14 @@ class BaseModel(nn.Module):
         :return:
         """
         self.eval()
+        detailed_eval_params = detailed_eval_params or {}
         total_loss = 0.0
         gts: List[torch.Tensor] = []
         preds: List[torch.Tensor] = []
         with torch.no_grad():
             for batch_x, batch_y in data_loader:
                 y_pred = self(batch_x)
-                loss = self.calculate_loss(y_pred, batch_y, loss_fn)
+                loss = loss_fn(y_pred, batch_y)
                 total_loss += loss.item()
                 preds.append(y_pred)
                 gts.append(batch_y)

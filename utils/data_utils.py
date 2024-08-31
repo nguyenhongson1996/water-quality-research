@@ -1,3 +1,5 @@
+import math
+import statistics
 from bisect import bisect
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, NamedTuple
@@ -45,7 +47,7 @@ def get_month_year(time_str: str) -> Optional[Tuple[int, int]]:
     return year, month
 
 
-def load_data_from_excels(files: List[str], data_dir: Path = DATA_DIR, ) -> List[DataSample]:
+def load_data_from_excels(files: List[str], data_dir: Path = DATA_DIR) -> List[DataSample]:
     """
     Read data from excel files.
     :param files: Excel files that contain the data.
@@ -110,7 +112,7 @@ def split_train_test(full_data: Dict[str, List[DataSample]],
     :return: Training and testing dataset.
     """
     min_accepted_test_year = max(
-        min(sample.year for sample in data_by_location[location]) for location in data_by_location)
+        min(sample.year for sample in full_data[location]) for location in full_data)
     if start_test_year < min_accepted_test_year + 1:
         raise ValueError(f"The testing set must be selected after {start_test_year}")
     training_data: Dict[str, List[DataSample]] = {}
@@ -124,9 +126,26 @@ def split_train_test(full_data: Dict[str, List[DataSample]],
     return training_data, testing_data
 
 
-if __name__ == "__main__":
-    files = ["predata.xls", "Data.xlsx"]
-    data = load_data_from_excels(files)
-    print(len(data))
+def load_and_split_data(files: List[str], data_dir: Path = DATA_DIR,
+                        start_test_year: int = 2018) -> Tuple[Dict[str, List[DataSample]],
+                                                              Dict[str, List[DataSample]]]:
+    """
+    Load data from excel files and split to training/testing set.
+    :param files: Files to load data.
+    :param data_dir: Folder contains data files.
+    :param start_test_year: The starting year of testing set.
+    :return: Training and testing dataset.
+    """
+    data = load_data_from_excels(files, data_dir)
     data_by_location = split_data_by_location(data)
-    training_data, testing_data = split_train_test(data_by_location, start_test_year=2018)
+    training_data, testing_data = split_train_test(data_by_location, start_test_year=start_test_year)
+    return training_data, testing_data
+
+
+def get_avg_value(substance: str, samples: List[DataSample]) -> float:
+    """
+    Get default value for a substance.
+    """
+    values = [sample.chem_substance_concentration[substance] for sample in samples]
+    filtered_data = [value for value in values if not math.isnan(value)]
+    return statistics.mean(filtered_data)
