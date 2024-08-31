@@ -1,12 +1,12 @@
-# Water Quality Index Prediction
+# Algal Bloom Prediction
 
-##### Author: Levi (nguyenhongson.kstn.hust@gmail.com)
+##### Author: Levi (nguyenhongson.kstn.hust@gmail.com) et. al.
 
-#### Credit: This problem is given by Assoc. Prof. Le Chi Ngoc. For more details about problem or dataset, please contact Prof. Le Chi Ngoc.
+#### Credits: This problem is given by Assoc. Prof. Le Chi Ngoc. For more details, please contact Prof. Le Chi Ngoc.
 
 ## Description
 
-Framework for experiment with Water Index Prediction problem. This dataset is closely related to this publication:
+This is an educational research framework for Algal Bloom Prediction problem. This work is closely related to this publication:
 
 - [Application of Machine Learning for eutrophication analysis and algal bloom prediction in an urban river: A 10-year study of the Han River, South Korea](https://www.sciencedirect.com/science/article/abs/pii/S0048969721041127?fbclid=IwY2xjawE_-45leHRuA2FlbQIxMAABHUKnb-7glbIBPBUhYsdWqfZk1zfe6rURGLAfg1HlmiNtIoWnKYpe8HWAjw_aem_i5PeffJUSm-RtxDPKi2ZXA)
 
