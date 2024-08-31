@@ -1,5 +1,38 @@
 import os
+import random
 from pathlib import Path
+
+import numpy as np
+import torch
+
+
+def set_seed(seed: int = 42):
+    """
+    Set the random seed for reproducibility.
+    :param seed: The seed value to use. Default is 42.
+    """
+    # Set the random seed for Python's built-in random module.
+    random.seed(seed)
+
+    # Set the random seed for NumPy.
+    np.random.seed(seed)
+
+    # Set the random seed for PyTorch.
+    torch.manual_seed(seed)
+
+    # If CUDA (GPU) is used, set the random seed for it.
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)  # For multi-GPU setups.
+        # These settings ensure deterministic behavior for CUDA.
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+
+    # Set seed for any other libraries that use random operations.
+    os.environ['PYTHONHASHSEED'] = str(seed)
+
+
+set_seed()
 
 PRJ_PATH = Path(os.path.abspath(__file__)).resolve().parent.parent
 
