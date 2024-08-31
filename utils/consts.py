@@ -48,7 +48,7 @@ LOCATION_COLUMN_NAME = "Name (E)"
 TIME_COLUMN_NAME = "YY/MM"
 TARGET_COLUMN_NAME = "TSI(Chl-a)"
 # Columns that are the concentration of chemical substance.
-CHEMICAL_SUBSTANCE_COLUMNS = list(set(COLUMNS) - {LOCATION_COLUMN_NAME, TIME_COLUMN_NAME})
+CHEMICAL_SUBSTANCE_COLUMNS = list(set(COLUMNS) - {LOCATION_COLUMN_NAME, TIME_COLUMN_NAME, TARGET_COLUMN_NAME})
 
 # Year when the data was first collected.
 START_YEAR = 2011
