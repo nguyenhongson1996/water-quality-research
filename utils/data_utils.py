@@ -149,3 +149,16 @@ def get_avg_value(substance: str, samples: List[DataSample]) -> float:
     values = [sample.chem_substance_concentration[substance] for sample in samples]
     filtered_data = [value for value in values if not math.isnan(value)]
     return statistics.mean(filtered_data)
+
+def convert_to_dataframe(data: Dict[str, List[DataSample]]) -> pd.DataFrame:
+    """
+    Convert data samples to a DataFrame.
+    :param data: The data to convert, typically the training or testing dataset.
+    :return: A DataFrame containing the samples.
+    """
+    rows = []
+    for location, samples in data.items():
+        for sample in samples:
+            row = {**sample.chem_substance_concentration, 'target': sample.target_value}
+            rows.append(row)
+    return pd.DataFrame(rows)
