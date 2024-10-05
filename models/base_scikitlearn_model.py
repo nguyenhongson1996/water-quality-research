@@ -1,5 +1,3 @@
-import os
-import sys
 from abc import abstractmethod
 from typing import Any, Dict, Optional, Tuple
 
@@ -9,24 +7,18 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 
 
-# Get the directory path of the current Python file.
-file_dir = os.path.dirname(__file__)
-
-# Add the parent directory to the system path.
-sys.path.append(os.path.join(file_dir, 'C:\\Users\\PC\\test_code'))
-
 class BaseModel:
-    def __init__(self, model_type: str = 'sgd', lr: float = 0.001, **kwargs):
+    def __init__(self, lr: float = 0.001, **kwargs):
         """
         Basic regression model using scikit-learn.
         :param model_type: Type of regression model ('sgd' or 'ridge').
         :param lr: Learning rate.
         """
         self.lr = lr
-        self.model = self._build_model(model_type,  **kwargs)
+        self.model = self._build_model (**kwargs)
 
 
-    def _build_model(self, model_type: str, **kwargs):
+    def _build_model(self):
         """
         Construct the regression model.
         """
@@ -47,7 +39,7 @@ class BaseModel:
 
         for epoch in range(epochs):
             # partial_fit allows the model to be updated with new batches of data without needing to retrain from scratch.
-            self.model.partial_fit(X_train, y_train)
+            self.model.fit(X_train, y_train)
 
             train_loss = mean_squared_error(y_train, self.model.predict(X_train))
 

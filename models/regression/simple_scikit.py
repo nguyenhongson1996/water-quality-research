@@ -13,13 +13,6 @@ class LinearRegression:
         """
         self.model = SklearnLinearRegression()
 
-    def forward(self, batch: np.ndarray):
-        """
-        Predict function for the Linear Regression model.
-        :param batch: Input batch.
-        :return: Predictions.
-        """
-        return self.model.predict(batch)
 
     def fit(self, X_train: np.ndarray, y_train: np.ndarray):
         """
@@ -41,9 +34,9 @@ class LinearRegression:
 class BasicRegression(BaseModel):
     def __init__(self):
         super(BasicRegression, self).__init__()
-        self.network = self._build_network()
+        self.network = self._build_model()
 
-    def _build_network(self) -> LinearRegression:
+    def _build_model(self) -> LinearRegression:
         """
         Build the scikit-learn Linear Regression network.
         """

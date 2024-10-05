@@ -1,11 +1,3 @@
-import os
-import sys
-
-# Get the directory path of the current Python file
-file_dir = os.path.dirname(__file__)
-
-# Add the parent directory to the system path
-sys.path.append(os.path.join(file_dir, 'C:\\Users\\PC\\test_code'))
 import numpy as np
 import pandas as pd
 from utils.data_utils import load_and_split_data
