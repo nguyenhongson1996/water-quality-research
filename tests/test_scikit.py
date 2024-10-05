@@ -3,7 +3,9 @@ import pandas as pd
 from utils.data_utils import load_and_split_data
 from utils.dataset import get_simple_dataloader
 from models.regression.simple_scikit import SimpleSkLearnRegression
-from sklearn.metrics import mean_squared_error
+from models.regression.simple_scikit import SimpleSVR
+
+
 def convert_dataloader_to_dataframe(dataloader) -> pd.DataFrame:
     """
     Convert the data from a dataloader into a pandas DataFrame.
@@ -14,15 +16,16 @@ def convert_dataloader_to_dataframe(dataloader) -> pd.DataFrame:
     features, targets = [], []
     for data in dataloader:
         x, y = data
-        features.append(x.numpy())  
+        features.append(x.numpy())
         targets.append(y.numpy())
 
-    features = np.vstack(features) 
+    features = np.vstack(features)
     targets = np.concatenate(targets)
-    feature_names = [f'feature_{i}' for i in range(features.shape[1])]  
+    feature_names = [f'feature_{i}' for i in range(features.shape[1])]
     df = pd.DataFrame(features, columns=feature_names)
     df['target'] = targets
     return df
+
 
 files = ["predata.xls", "Data.xlsx"]
 training_data, testing_data = load_and_split_data(files)
@@ -34,12 +37,10 @@ y_train = train_df['target'].values
 X_test = test_df.drop(columns=['target']).values
 y_test = test_df['target'].values
 
+print("Linear regression")
 model = SimpleSkLearnRegression()
-model.fit(X_train, y_train)
-y_pred = model.predict(X_test)
-mse = mean_squared_error(y_test, y_pred)
-print(f'Mean Squared Error: {mse}')
+model.fit(X_train, y_train, X_test, y_test)
 
-num_points_to_show = 5
-for i in range(num_points_to_show):
-    print(f'True Value: {y_test[i]}, Predicted Value: {y_pred[i]}')
+print("SVR")
+model = SimpleSVR()
+model.fit(X_train, y_train, X_test, y_test)

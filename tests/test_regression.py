@@ -18,5 +18,5 @@ num_epochs = 200
 lr = 0.01
 lr_params = {"start_factor": 0.1,
              "end_factor": lr, "total_iters": num_epochs}
-model.fit(train_dataloader, test_dataloader, epochs=num_epochs, optimizer_type="adam", loss_fn=nn.MSELoss(), lr=lr,
+model.fit(train_dataloader, test_dataloader, epochs=num_epochs, optimizer_type="adam", loss_fn=nn.L1Loss(), lr=lr,
           scheduler_params=lr_params, patience=20)
