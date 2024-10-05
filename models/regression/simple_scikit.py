@@ -31,9 +31,9 @@ class LinearRegression:
         return self.model.predict(X)
 
 
-class BasicRegression(BaseModel):
+class SimpleSkLearnRegression(BaseModel):
     def __init__(self):
-        super(BasicRegression, self).__init__()
+        super(SimpleSkLearnRegression, self).__init__()
         self.network = self._build_model()
 
     def _build_model(self) -> LinearRegression:
