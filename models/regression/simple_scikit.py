@@ -1,7 +1,8 @@
 from typing import Any, Dict, List
+
+import numpy as np
 from sklearn.linear_model import LinearRegression as SklearnLinearRegression
 from sklearn.metrics import mean_squared_error
-import numpy as np
 from models.base_scikitlearn_model import BaseModel
 
 

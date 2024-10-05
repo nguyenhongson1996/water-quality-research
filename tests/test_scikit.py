@@ -12,7 +12,7 @@ from utils.data_utils import load_and_split_data
 from utils.dataset import get_simple_dataloader
 from models.regression.simple_scikit import BasicRegression
 from sklearn.metrics import mean_squared_error
-def convert_dataloader_to_dataframe(dataloader):
+def convert_dataloader_to_dataframe(dataloader) -> pd.DataFrame:
     """
     Convert the data from a dataloader into a pandas DataFrame.
     

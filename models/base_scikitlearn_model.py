@@ -1,39 +1,36 @@
 import os
 import sys
-
-# Get the directory path of the current Python file
-file_dir = os.path.dirname(__file__)
-
-# Add the parent directory to the system path
-sys.path.append(os.path.join(file_dir, 'C:\\Users\\PC\\test_code'))
 from abc import abstractmethod
 from typing import Any, Dict, Optional, Tuple
+
+import numpy as np
 from sklearn.linear_model import SGDRegressor, Ridge
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
-import numpy as np
+
+
+# Get the directory path of the current Python file.
+file_dir = os.path.dirname(__file__)
+
+# Add the parent directory to the system path.
+sys.path.append(os.path.join(file_dir, 'C:\\Users\\PC\\test_code'))
 
 class BaseModel:
-    def __init__(self, model_type: str = 'sgd', lr: float = 0.001):
+    def __init__(self, model_type: str = 'sgd', lr: float = 0.001, **kwargs):
         """
         Basic regression model using scikit-learn.
-        :param input_dim: Input dimension (used for compatibility, not necessary for scikit-learn).
         :param model_type: Type of regression model ('sgd' or 'ridge').
         :param lr: Learning rate.
         """
         self.lr = lr
-        self.model = self._build_model(model_type)
+        self.model = self._build_model(model_type,  **kwargs)
 
-    def _build_model(self, model_type: str):
+
+    def _build_model(self, model_type: str, **kwargs):
         """
         Construct the regression model.
         """
-        if model_type == 'sgd':
-            return SGDRegressor(learning_rate='constant', eta0=self.lr)
-        elif model_type == 'ridge':
-            return Ridge(alpha=self.lr)
-        else:
-            raise ValueError(f"Unsupported model type: {model_type}")
+        raise NotImplementedError()
 
     def fit(self, X_train: np.ndarray, y_train: np.ndarray, X_val: Optional[np.ndarray] = None, y_val: Optional[np.ndarray] = None, epochs: int = 100, patience: int = 10):
         """
@@ -49,7 +46,8 @@ class BaseModel:
         epochs_without_improvement = 0
 
         for epoch in range(epochs):
-            self.model.partial_fit(X_train, y_train)  # Incremental training
+            # partial_fit allows the model to be updated with new batches of data without needing to retrain from scratch.
+            self.model.partial_fit(X_train, y_train)
 
             train_loss = mean_squared_error(y_train, self.model.predict(X_train))
 
