@@ -44,3 +44,5 @@ conda activate water-quality
 export PYTHONPATH=.
 ```
 
+https://docs.google.com/spreadsheets/d/1FQJqFbZk1K2fM3mbL_lvdDPBf7TbWIhlGlFnzy5-tzg/edit?gid=1849550514#gid=1849550514
+
