@@ -28,7 +28,7 @@ class BasicRegression(BaseModel):
 class CNN(nn.Module):
     def __init__(self, input_dim: int):
         super().__init__()
-        self.cnn = nn.Conv1d(in_channels = input_dim, out_channels=1, kernel_size=1)
+        self.cnn = nn.Conv1d(in_channels=input_dim, out_channels=1, kernel_size=1)
 
     def forward(self, batch):
         batch = batch.unsqueeze(1)
