@@ -14,7 +14,7 @@ input_dim = first_x.shape[-1]
 
 model = BasicCNN(input_dim = input_dim)
 
-num_epochs = 800
+num_epochs = 500
 lr = 0.01
 lr_params = {"start_factor": 0.1,
              "end_factor": lr, "total_iters": num_epochs}
