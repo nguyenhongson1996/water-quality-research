@@ -1,26 +1,22 @@
 from torch import nn
-from models.regression.simple_regression import BasicRegression
 from models.regression.simple_lstm import BasicLSTM
-from models.regression.simple_scikit import SimpleSkLearnRegression
-from models.regression.simple_scikit import SimpleSVR
 from utils.data_utils import load_and_split_data
-from utils.dataset import get_simple_dataloader
+from utils.lstm_dataset import get_lstm_dataloader
 
-files = ["predata.xls", "Data.xlsx"]
-training_data, testing_data = load_and_split_data(files)
-train_dataloader = get_simple_dataloader(training_data, shuffle=True)
-test_dataloader = get_simple_dataloader(testing_data, shuffle=False)
-
-first_x, first_y = train_dataloader.dataset[0]
-
-input_dim = first_x.shape[-1]
 hidden_dim = 50
 num_layers = 1
 output_dim = 1
-# model = SimpleSkLearnRegression()
-# model = SimpleSVR()
-# model = BasicRegression(input_dim)
-model = BasicLSTM(input_dim=input_dim, hidden_dim = hidden_dim, num_layers = num_layers, output_dim = output_dim)
+seq_length = 12
+
+files = ["predata.xls", "Data.xlsx"]
+training_data, testing_data = load_and_split_data(files)
+train_dataloader = get_lstm_dataloader(training_data, seq_length, shuffle=True)
+test_dataloader = get_lstm_dataloader(testing_data, seq_length, shuffle=False)
+
+first_x, first_y = train_dataloader.dataset[0]
+input_dim = first_x.shape[-1]
+
+model = BasicLSTM(input_dim=input_dim, hidden_dim = hidden_dim, num_layers = num_layers, output_dim = output_dim, seq_length = seq_length)
 
 num_epochs = 200
 lr = 0.01
