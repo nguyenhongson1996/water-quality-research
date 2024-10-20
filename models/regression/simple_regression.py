@@ -28,27 +28,24 @@ class BasicRegression(BaseModel):
 class CNN(nn.Module):
     def __init__(self, input_dim: int):
         """
-            input_dim: number of features of input.
-            out_channels: parameter, can be changed depended on 
-            different purposes: combining a fully connected layer, etc. 
-            kernel_size set to 1 because there exists a dimension of 
-            input equal to 1.
+        Basic CNN model
+        :param input_dim: Number of features of input.
+        :param out_channels: Parameter that can be changed depending on different purposes, 
+                             such as combining a fully connected layer, etc.
+        :param kernel_size: Kernel size, arbitrary number, satisfy 2 * padding = kernel_size - 1. 
+        :param padding: Padding.
         """
         super().__init__()
-        self.cnn = nn.Conv1d(in_channels=input_dim, out_channels=1, kernel_size=1)
+        self.cnn = nn.Conv1d(in_channels=input_dim, out_channels=1, kernel_size=3, padding=1)
     def forward(self, data: torch.Tensor) -> torch.Tensor:
         """
-            Build CNN with PyTorch
-            unsqueeze: Add a dimension to data so as to be suitable for 
-            Conv1d (batch_size, input_dim) -> (batch_size, 1, input_dim).
-            permute: change location of dimension so that input_dim turns 
-            to be second dimension.
-            view(data.size(0), -1): flatten to 2D.
+            Build CNN using PyTorch.    
         """
-        data = data.unsqueeze(1)   
-        data = data.permute(0, 2, 1)
+        data = data.unsqueeze(2)   
+        # Add a dimension to data so as to be suitable for Conv1d (batch_size, input_dim) -> (batch_size, input_dim, 1).                                   
+        data = data.permute(2,1,0) # Change (batch_size, input_dim, 1) -> (1, input_dim, batch_size) 
         data = self.cnn(data)
-        data = data.view(data.size(0), -1) 
+        data = data.view(data.size(0), -1) # flatten to 2D.
         return data
     
 class BasicCNN(BaseModel):
