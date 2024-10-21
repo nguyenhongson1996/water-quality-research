@@ -44,8 +44,11 @@ class ChemicalSequenceDataset(Dataset):
         ])
 
         # The target for the sequence is the target value of the last sample
-        target = torch.tensor(sequence_samples[-1].target_value, dtype=torch.float32)
-        return features, target
+        targets = torch.tensor(
+            [sample.target_value for sample in sequence_samples], 
+            dtype=torch.float32
+        )  # Shape: (seq_length,)
+        return features, targets
 
 def get_lstm_dataloader(data_by_location: Dict[str, List[DataSample]], 
                         batch_size: int = 4, seq_length: int = 5, 
@@ -69,4 +72,4 @@ def get_lstm_dataloader(data_by_location: Dict[str, List[DataSample]],
 
     # Create a DataLoader
     dataloader = DataLoader(dataset=dataset, batch_size=batch_size, shuffle=shuffle)
-    return dataloader
+    return dataloader    
