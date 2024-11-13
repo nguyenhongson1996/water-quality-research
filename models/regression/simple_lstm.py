@@ -7,15 +7,14 @@ from torch.utils.data.dataloader import DataLoader
 
 
 class LSTMNetwork(nn.Module):
-    """
-    Basic LSTM network.
-
-    :param input_dim: Input dimension.
-    :param hidden_dim: Hidden state dimension.
-    :param num_layers: Number of LSTM layers.
-    :param output_dim: Output dimension.
-    """
     def __init__(self, input_dim: int, hidden_dim: int, num_layers: int, output_dim: int):
+        """
+        Basic LSTM network.
+        :param input_dim: Input dimension.
+        :param hidden_dim: Hidden state dimension.
+        :param num_layers: Number of LSTM layers.
+        :param output_dim: Output dimension.
+        """
         super(LSTMNetwork, self).__init__()
         self.lstm = nn.LSTM(input_dim, hidden_dim, num_layers, batch_first=True)  # LSTM layer.
         self.fc = nn.Linear(hidden_dim, output_dim)  # Fully connected layer.
@@ -31,17 +30,17 @@ class LSTMNetwork(nn.Module):
 
 
 class BasicLSTM(BaseModel):
-    """
-    Basic LSTM model.
-
-    :param input_dim: Input dimension.
-    :param hidden_dim: Hidden state dimension.
-    :param num_layers: Number of LSTM layers.
-    :param output_dim: Output dimension.
-    :param seq_length: Sequence length.
-    """
     def __init__(self, input_dim: int, hidden_dim: int, num_layers: int, output_dim: int,
                  seq_length: int):
+        """
+        Basic LSTM model.
+
+        :param input_dim: Input dimension.
+        :param hidden_dim: Hidden state dimension.
+        :param num_layers: Number of LSTM layers.
+        :param output_dim: Output dimension.
+        :param seq_length: Sequence length.
+        """
         self.hidden_dim = hidden_dim
         self.num_layers = num_layers
         self.output_dim = output_dim
