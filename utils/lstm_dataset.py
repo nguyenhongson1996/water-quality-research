@@ -21,16 +21,25 @@ class ChemicalSequenceDataset(Dataset):
             substance: get_avg_value(substance=substance, samples=self.samples)
             for substance in CHEMICAL_SUBSTANCE_COLUMNS
         }
-
+            # Ensure there are enough samples to create at least one full sequence.
+        if len(self.samples) >= self.seq_length:
+            # Create indices for non-overlapping sequences.
+            self.indices = list(range(0, len(self.samples) - self.seq_length + 1, self.seq_length))
+        else:
+            # If not enough samples, set indices to an empty list.
+            self.indices = []
     def __len__(self):
-        # Total number of sequences that can be generated.
-        return len(self.samples) - self.seq_length + 1
+        # Total number of non-overlapping sequences available.
+        return len(self.indices)
 
     def __getitem__(self, idx):
-        # Create a sequence from the dataset.
-        sequence_samples = self.samples[idx: idx + self.seq_length]
+        # Get the starting index for the current sequence.
+        start_idx = self.indices[idx]
+        
+        # Extract a sequence of samples starting from `start_idx`.
+        sequence_samples = self.samples[start_idx: start_idx + self.seq_length]
 
-        # Extract features and targets for the entire sequence.
+        # Extract features for each sample in the sequence.
         features = torch.stack([
             torch.tensor(
                 [
@@ -43,11 +52,12 @@ class ChemicalSequenceDataset(Dataset):
             ) for sample in sequence_samples
         ])
 
-        # The targets for the sequence are the target values of all samples in the sequence.
+        # Extract target values for the entire sequence.
         targets = torch.tensor(
             [sample.target_value for sample in sequence_samples], 
             dtype=torch.float32
         )  # Shape: (seq_length,).
+        
         return features, targets
 
 def get_lstm_dataloader(data_by_location: Dict[str, List[DataSample]], 

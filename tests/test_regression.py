@@ -6,7 +6,7 @@ from utils.lstm_dataset import get_lstm_dataloader
 hidden_dim = 50
 num_layers = 1
 output_dim = 1
-seq_length = 12
+seq_length = 3
 
 files = ["predata.xls", "Data.xlsx"]
 training_data, testing_data = load_and_split_data(files)
