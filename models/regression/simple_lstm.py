@@ -19,14 +19,6 @@ class LSTMNetwork(nn.Module):
         self.lstm = nn.LSTM(input_dim, hidden_dim, num_layers, batch_first=True)  # LSTM layer.
         self.fc = nn.Linear(hidden_dim, output_dim)  # Fully connected layer.
 
-    def forward(self, batch: torch.Tensor) -> torch.Tensor:
-        """
-        Forward pass.
-        :param batch: Input batch.
-        :return: Model output.
-        """
-        lstm_out, _ = self.lstm(batch)  # Input shape: (batch_size, seq_length, hidden_dim).
-        return self.fc(lstm_out).squeeze()  # Shape: (batch_size, seq_length, output_dim).
 
 
 class BasicLSTM(BaseModel):
@@ -47,6 +39,8 @@ class BasicLSTM(BaseModel):
         self.seq_length = seq_length  # Sequence length for data preparation.
         super(BasicLSTM, self).__init__(input_dim)
 
+        self.model = self._build_network()
+
     def _build_network(self) -> nn.Module:
         """
         Builds the LSTM network.
@@ -54,6 +48,20 @@ class BasicLSTM(BaseModel):
         :return: The LSTM model.
         """
         return LSTMNetwork(self.input_dim, self.hidden_dim, self.num_layers, self.output_dim)
+
+    def forward(self, batch: torch.Tensor, h0: Optional[torch.Tensor] = None, c0: Optional[torch.Tensor] = None) -> torch.Tensor:
+        """
+        Forward pass.
+        :param batch: Input batch.
+        :param h0: Initial hidden state.
+        :param c0: Initial cell state.
+        :return: Model output.
+        """
+        if h0 is None or c0 is None:
+            lstm_out, _ = self.model.lstm(batch)  # Sử dụng h0, c0  mặc định
+        else:
+            lstm_out, _ = self.model.lstm(batch, (h0, c0))  # Sử dụng h0, c0 tùy chỉnh
+        return self.model.fc(lstm_out).squeeze()  # Shape: (batch_size, seq_length, output_dim)
 
     def calculate_detailed_report(self, predictions: List[torch.Tensor], ground_truth: List[torch.Tensor],
                                   **kwargs) -> Dict[str, Any]:
@@ -65,6 +73,26 @@ class BasicLSTM(BaseModel):
         :return: Detailed evaluation report.
         """
         return {}
+
+    def reconstruct_hidden_state(self, y: torch.Tensor) -> torch.Tensor:
+        """
+        Construct h0 from the given y using the inverse of the FC layer.
+        :param y: Output value.
+        :return: Reconstructed hidden state vector.
+        """
+        W = self.model.fc.weight.data  # (output_dim, hidden_dim)
+        c = self.model.fc.bias.data    # (output_dim,)
+
+        y = y.unsqueeze(0) 
+        c = c.unsqueeze(0) # (batch_size, output_dim)
+
+        # Tính nghịch đảo của W (pseudo-inverse)
+        W_inv = torch.pinverse(W)  # (hidden_dim, output_dim)
+        # Tính toán x từ y: x = (y - c) * W^-1
+        h0 = (y - c).mm(W_inv.t())  # (batch_size, hidden_dim)
+
+        # Đảm bảo kích thước phù hợp (num_layers, batch_size, hidden_dim)
+        return h0.unsqueeze(0).repeat(self.num_layers, 1, 1)
 
     def fit(self, train_loader: DataLoader, val_loader: Optional[DataLoader], epochs: int = 100,
             optimizer_type: str = "adam", loss_fn: nn.Module = nn.MSELoss(), lr: float = 0.001,
@@ -96,7 +124,10 @@ class BasicLSTM(BaseModel):
 
             for batch_x, batch_y in train_loader:
                 optimizer.zero_grad()
-                y_pred = self(batch_x)  # Predict the output for the entire sequence.
+                y_prev = batch_y[0, 0]
+                h0_new = self.reconstruct_hidden_state(y_prev)
+                # Truyền h0 mới vào LSTM
+                y_pred = self(batch_x, h0=h0_new)  
                 # Calculate loss for each element in the sequence.
                 loss = loss_fn(y_pred.view(-1, self.output_dim), batch_y.view(-1, self.output_dim))
                 loss.backward()

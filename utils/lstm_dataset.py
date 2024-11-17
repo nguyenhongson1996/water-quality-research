@@ -61,7 +61,7 @@ class ChemicalSequenceDataset(Dataset):
         return features, targets
 
 def get_lstm_dataloader(data_by_location: Dict[str, List[DataSample]], 
-                        batch_size: int = 4, seq_length: int = 5, 
+                        seq_length: int, batch_size: int = 4, 
                         shuffle: bool = False) -> DataLoader:
     """
     Create a DataLoader for LSTM.
