@@ -57,7 +57,7 @@ class BasicLSTM(BaseModel):
         :param c0: Initial cell state.
         :return: Model output.
         """
-        if h0 is None or c0 is None:
+        if h0 is None:
             lstm_out, _ = self.model.lstm(batch)  # Sử dụng h0, c0  mặc định
         else:
             lstm_out, _ = self.model.lstm(batch, (h0, c0))  # Sử dụng h0, c0 tùy chỉnh
@@ -83,8 +83,9 @@ class BasicLSTM(BaseModel):
         W = self.model.fc.weight.data  # (output_dim, hidden_dim)
         c = self.model.fc.bias.data    # (output_dim,)
 
-        y = y.unsqueeze(0) 
-        c = c.unsqueeze(0) # (batch_size, output_dim)
+        batch_size = y.size(0)
+        y = y.unsqueeze(1).expand(-1, W.size(0))
+        c = c.unsqueeze(0).expand(batch_size, -1)
 
         # Tính nghịch đảo của W (pseudo-inverse)
         W_inv = torch.pinverse(W)  # (hidden_dim, output_dim)
@@ -124,10 +125,11 @@ class BasicLSTM(BaseModel):
 
             for batch_x, batch_y in train_loader:
                 optimizer.zero_grad()
-                y_prev = batch_y[0, 0]
+                y_prev = batch_y[:, 0]
                 h0_new = self.reconstruct_hidden_state(y_prev)
+                c0_new = torch.zeros_like(h0_new) # Khởi tạo c0 với cùng kích thước như h0
                 # Truyền h0 mới vào LSTM
-                y_pred = self(batch_x, h0=h0_new)  
+                y_pred = self(batch_x, h0=h0_new, c0=c0_new)  
                 # Calculate loss for each element in the sequence.
                 loss = loss_fn(y_pred.view(-1, self.output_dim), batch_y.view(-1, self.output_dim))
                 loss.backward()
