@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import torch
 from torch import nn
@@ -139,7 +139,7 @@ class BasicLSTM(BaseModel):
             train_loss /= len(train_loader)  # Compute the average loss for the entire train set.
 
             if val_loader:
-                val_loss, detailed_report = self.evaluate(val_loader, loss_fn, detailed_eval_params)
+                val_loss, detailed_report = self.evaluate(val_loader, loss_fn, detailed_eval_params, h0_new, c0_new)
                 print(f"Epoch {epoch + 1}/{epochs}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}")
                 if detailed_report:
                     print("Detailed report:")
@@ -167,3 +167,30 @@ class BasicLSTM(BaseModel):
                     scheduler.step()
 
             print(f"Current learning rate: {optimizer.param_groups[0]['lr']:.6f}")
+
+    def evaluate(self, data_loader: DataLoader, loss_fn: nn.Module = nn.MSELoss(),
+                 detailed_eval_params: Optional[Dict[str, Any]] = None, h0: Optional[torch.Tensor] = None, c0: Optional[torch.Tensor] = None) -> Tuple[float, Dict[str, Any]]:
+        """
+        Evaluate the model on the provided data loader.
+        :param data_loader: Eval dataloader.
+        :param loss_fn: Loss function.
+        :param detailed_eval_params: Params used for calculating the detailed report.
+        :return:
+        """
+        self.eval()
+        detailed_eval_params = detailed_eval_params or {}
+        total_loss = 0.0
+        gts: List[torch.Tensor] = []
+        preds: List[torch.Tensor] = []
+        with torch.no_grad():
+            for batch_x, batch_y in data_loader:
+                y_prev = batch_y[:, 0]
+                h0 = self.reconstruct_hidden_state(y_prev)
+                c0 = torch.zeros_like(h0) # Khởi tạo c0 với cùng kích thước như h0
+                y_pred = self(batch_x, h0, c0)
+                loss = loss_fn(y_pred, batch_y)
+                total_loss += loss.item()
+                preds.append(y_pred)
+                gts.append(batch_y)
+        detailed_reports = self.calculate_detailed_report(preds, gts, **detailed_eval_params)
+        return total_loss / len(data_loader), detailed_reports
