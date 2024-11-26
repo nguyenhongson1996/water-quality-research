@@ -58,10 +58,10 @@ class BasicLSTM(BaseModel):
         :return: Model output.
         """
         if h0 is None:
-            lstm_out, _ = self.model.lstm(batch)  # Sử dụng h0, c0  mặc định
+            lstm_out, _ = self.model.lstm(batch)  # Use default h0 and c0
         else:
-            lstm_out, _ = self.model.lstm(batch, (h0, c0))  # Sử dụng h0, c0 tùy chỉnh
-        return self.model.fc(lstm_out).squeeze()  # Shape: (batch_size, seq_length, output_dim)
+            lstm_out, _ = self.model.lstm(batch, (h0, c0))  # Use custom h0 and c0
+        return self.model.fc(lstm_out).squeeze()  # Shape: (batch_size, seq_length, output_dim).
 
     def calculate_detailed_report(self, predictions: List[torch.Tensor], ground_truth: List[torch.Tensor],
                                   **kwargs) -> Dict[str, Any]:
@@ -80,20 +80,19 @@ class BasicLSTM(BaseModel):
         :param y: Output value.
         :return: Reconstructed hidden state vector.
         """
-        W = self.model.fc.weight.data  # (output_dim, hidden_dim)
-        c = self.model.fc.bias.data    # (output_dim,)
+        W = self.model.fc.weight.data  # Shape: (output_dim, hidden_dim).
+        c = self.model.fc.bias.data    # Shape: (output_dim).
 
         batch_size = y.size(0)
-        y = y.unsqueeze(1).expand(-1, W.size(0))
-        c = c.unsqueeze(0).expand(batch_size, -1)
+        y = y.unsqueeze(1).expand(-1, W.size(0)) # Shape: (batch_size, output_dim).
+        c = c.unsqueeze(0).expand(batch_size, -1) # Shape: (batch_size, output_dim).
 
-        # Tính nghịch đảo của W (pseudo-inverse)
-        W_inv = torch.pinverse(W)  # (hidden_dim, output_dim)
-        # Tính toán x từ y: x = (y - c) * W^-1
-        h0 = (y - c).mm(W_inv.t())  # (batch_size, hidden_dim)
+        # Compute the pseudo-inverse of W
+        W_inv = torch.pinverse(W)  # Shape: (hidden_dim, output_dim).
+        # Calculate x from y: x = (y - c) * W^-1
+        h0 = (y - c).mm(W_inv.t())  # Shape: (batch_size, hidden_dim).
 
-        # Đảm bảo kích thước phù hợp (num_layers, batch_size, hidden_dim)
-        return h0.unsqueeze(0).repeat(self.num_layers, 1, 1)
+        return h0.unsqueeze(0).repeat(self.num_layers, 1, 1) # Shape: (num_layers, batch_size, hidden_dim).
 
     def fit(self, train_loader: DataLoader, val_loader: Optional[DataLoader], epochs: int = 100,
             optimizer_type: str = "adam", loss_fn: nn.Module = nn.MSELoss(), lr: float = 0.001,
@@ -125,18 +124,20 @@ class BasicLSTM(BaseModel):
 
             for batch_x, batch_y in train_loader:
                 optimizer.zero_grad()
+
                 y_prev = batch_y[:, 0]
                 h0_new = self.reconstruct_hidden_state(y_prev)
-                c0_new = torch.zeros_like(h0_new) # Khởi tạo c0 với cùng kích thước như h0
-                # Truyền h0 mới vào LSTM
+                # Initialize c0 with the same size as h0
+                c0_new = torch.zeros_like(h0_new) 
+                # Pass the new h0 into the LSTM
                 y_pred = self(batch_x, h0=h0_new, c0=c0_new)  
-                # Calculate loss for each element in the sequence.
-                loss = loss_fn(y_pred.view(-1, self.output_dim), batch_y.view(-1, self.output_dim))
+
+                loss = loss_fn(y_pred, batch_y)
                 loss.backward()
                 optimizer.step()
                 train_loss += loss.item()
 
-            train_loss /= len(train_loader)  # Compute the average loss for the entire train set.
+            train_loss /= len(train_loader)  
 
             if val_loader:
                 val_loss, detailed_report = self.evaluate(val_loader, loss_fn, detailed_eval_params, h0_new, c0_new)
@@ -186,7 +187,7 @@ class BasicLSTM(BaseModel):
             for batch_x, batch_y in data_loader:
                 y_prev = batch_y[:, 0]
                 h0 = self.reconstruct_hidden_state(y_prev)
-                c0 = torch.zeros_like(h0) # Khởi tạo c0 với cùng kích thước như h0
+                c0 = torch.zeros_like(h0) 
                 y_pred = self(batch_x, h0, c0)
                 loss = loss_fn(y_pred, batch_y)
                 total_loss += loss.item()
