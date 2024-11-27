@@ -6,11 +6,11 @@ from utils.lstm_dataset import get_lstm_dataloader
 hidden_dim = 50
 num_layers = 1
 output_dim = 1
-seq_length = 3
+seq_length = 4
 
 files = ["predata.xls", "Data.xlsx"]
 training_data, testing_data = load_and_split_data(files)
-train_dataloader = get_lstm_dataloader(training_data, seq_length, shuffle=True)
+train_dataloader = get_lstm_dataloader(training_data, seq_length, shuffle=False)
 test_dataloader = get_lstm_dataloader(testing_data, seq_length, shuffle=False)
 
 first_x, first_y = train_dataloader.dataset[0]
