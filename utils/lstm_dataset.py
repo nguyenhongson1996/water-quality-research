@@ -24,7 +24,7 @@ class ChemicalSequenceDataset(Dataset):
             # Ensure there are enough samples to create at least one full sequence.
         if len(self.samples) >= self.seq_length:
             # Create indices for non-overlapping sequences.
-            self.indices = list(range(0, len(self.samples) - self.seq_length + 1, self.seq_length))
+            self.indices = [0] + list(range(seq_length - 1, len(self.samples) - self.seq_length + 1, self.seq_length))
         else:
             # If not enough samples, set indices to an empty list.
             self.indices = []
@@ -36,8 +36,12 @@ class ChemicalSequenceDataset(Dataset):
         # Get the starting index for the current sequence.
         start_idx = self.indices[idx]
         
-        # Extract a sequence of samples starting from `start_idx`.
-        sequence_samples = self.samples[start_idx: start_idx + self.seq_length]
+        if start_idx == 0:
+            padding_sample = self.samples[0]  # Lấy giá trị tháng đầu tiên làm padding
+            sequence_samples = [padding_sample] + self.samples[start_idx: start_idx + self.seq_length]
+        else:
+            # Extract a sequence of samples starting from `start_idx`.
+            sequence_samples = self.samples[start_idx - 1: start_idx + self.seq_length]
 
         # Extract features for each sample in the sequence.
         features = torch.stack([

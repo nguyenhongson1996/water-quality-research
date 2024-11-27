@@ -130,9 +130,12 @@ class BasicLSTM(BaseModel):
                 # Initialize c0 with the same size as h0
                 c0_new = torch.zeros_like(h0_new) 
                 # Pass the new h0 into the LSTM
-                y_pred = self(batch_x, h0=h0_new, c0=c0_new)  
 
-                loss = loss_fn(y_pred, batch_y)
+                batch_x_to_pred = batch_x[:, 1:, :]
+                batch_y_to_pred = batch_y[:, 1:]
+                y_pred = self(batch_x_to_pred, h0=h0_new, c0=c0_new)  
+
+                loss = loss_fn(y_pred, batch_y_to_pred)
                 loss.backward()
                 optimizer.step()
                 train_loss += loss.item()
@@ -188,8 +191,10 @@ class BasicLSTM(BaseModel):
                 y_prev = batch_y[:, 0]
                 h0 = self.reconstruct_hidden_state(y_prev)
                 c0 = torch.zeros_like(h0) 
-                y_pred = self(batch_x, h0, c0)
-                loss = loss_fn(y_pred, batch_y)
+                batch_x_to_pred = batch_x[:, 1:, :]
+                batch_y_to_pred = batch_y[:, 1:]
+                y_pred = self(batch_x_to_pred, h0, c0)
+                loss = loss_fn(y_pred, batch_y_to_pred)
                 total_loss += loss.item()
                 preds.append(y_pred)
                 gts.append(batch_y)
